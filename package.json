@@ -1,0 +1,26 @@
+{
+  "name": "self-hostable-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "repository": "https://github.com/EuphoriaTheme/self-hostable-backend",
+  "author": "Rep Graphics <repgraphics@euphoriadevelopment.uk>",
+  "license": "MIT",
+  "dependencies": {
+    "arma-rcon": "^1.0.2",
+    "axios": "^1.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "gamedig": "^5.3.1",
+    "express-session": "^1.18.1",
+    "js-yaml": "^4.1.0",
+    "multer": "^2.0.1",
+    "rcon-client": "^4.2.5",
+    "rcon-srcds": "^2.1.0",
+    "telnet-client": "^2.2.5"
+  },
+  "scripts": {
+    "update:games": "node ./scripts/updateGamesYml.js"
+  }
+}

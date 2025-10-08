@@ -1,0 +1,93 @@
+import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import validateTranslationBody from '../middleware/validateTranslationBody.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const router = express.Router();
+
+router.post('/translate/bulk', validateTranslationBody, async (req, res) => {
+  const { texts, targetLang } = req.body;
+
+  try {
+    // Load the appropriate translation file
+    const translationsPath = path.join(__dirname, `../public/translations/${targetLang}.json`);
+    if (!fs.existsSync(translationsPath)) {
+      return res.status(400).json({ success: false, error: `Translations for language "${targetLang}" are not available.` });
+    }
+
+    const translations = JSON.parse(fs.readFileSync(translationsPath, 'utf8'));
+
+    // Translate each text in the array
+    const translationsResult = {};
+    for (const text of texts) {
+      if (text.trim() !== '') {
+        translationsResult[text] = translations[text] || text; // Return the original text if translation is missing
+      }
+    }
+
+    res.json({ success: true, translations: translationsResult });
+  } catch (error) {
+    console.error('Error translating texts:', error);
+    res.status(500).json({ success: false, error: 'Failed to translate texts.' });
+  }
+});
+
+router.get('/', async (req, res) => {
+  try {
+    // Fetch the list of available translations
+    const translationsDir = path.join(__dirname, '../public/translations');
+    const availableTranslations = fs.readdirSync(translationsDir)
+      .filter(file => file.endsWith('.json'))
+      .map(file => {
+        const code = file.replace('.json', ''); // Remove the .json extension
+        const readableNames = {
+          ar: 'Arabic',
+          bg: 'Bulgarian',
+          bn: 'Bengali',
+          cs: 'Czech',
+          da: 'Danish',
+          de: 'German',
+          el: 'Greek',
+          es: 'Spanish',
+          fa: 'Persian',
+          fr: 'French',
+          gr: 'Greek',
+          he: 'Hebrew',
+          hi: 'Hindi',
+          hr: 'Croatian',
+          hu: 'Hungarian',
+          id: 'Indonesian',
+          it: 'Italian',
+          ja: 'Japanese',
+          ko: 'Korean',
+          ms: 'Malay',
+          nl: 'Dutch',
+          no: 'Norwegian',
+          pl: 'Polish',
+          pt: 'Portuguese',
+          ro: 'Romanian',
+          ru: 'Russian',
+          sk: 'Slovak',
+          sr: 'Serbian',
+          sv: 'Swedish',
+          tr: 'Turkish',
+          uk: 'Ukrainian',
+          uwunese: 'Uwunese',
+          vn: 'Vietnamese',
+          zh_tw: 'Chinese (Traditional)',
+          zh: 'Chinese (Simplified)'
+        };
+        return { code, name: readableNames[code] || code }; // Default to code if name is not found
+      });
+
+    res.json({ success: true, languages: availableTranslations });
+  } catch (error) {
+    console.error('Error fetching available translations:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch available translations.' });
+  }
+});
+
+export default router;
