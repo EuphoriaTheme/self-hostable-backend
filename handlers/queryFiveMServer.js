@@ -18,8 +18,8 @@ export default async function queryFiveMServer(ip, port) {
       success: true,
       data: {
         players,
-        maxPlayers: parseInt(serverData?.data?.vars?.sv_maxClients || '0', 10),
-        numPlayers: Array.isArray(playerData.data) ? playerData.data.length : 0,
+        maxplayers: parseInt(serverData?.data?.vars?.sv_maxClients || '0', 10),
+        numplayers: Array.isArray(playerData.data) ? playerData.data.length : 0,
         ping,
       },
     };
@@ -27,3 +27,4 @@ export default async function queryFiveMServer(ip, port) {
     return { success: false, error: error.message };
   }
 }
+
