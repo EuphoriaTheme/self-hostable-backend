@@ -1,9 +1,11 @@
 import net from 'net';
+import pingServer from './pingServer.js';
 
 export default function queryBeamMPServer(ip, port, timeout = 5000) {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
     let responseData = '';
+    const pingPromise = pingServer(ip, parseInt(port, 10));
 
     client.setTimeout(timeout);
 
@@ -23,7 +25,7 @@ export default function queryBeamMPServer(ip, port, timeout = 5000) {
       }
     });
 
-    client.on('close', () => {
+    client.on('close', async () => {
       console.log('Connection to BeamMP server closed.');
 
       if (responseData) {
@@ -34,14 +36,29 @@ export default function queryBeamMPServer(ip, port, timeout = 5000) {
           // Parse the sanitized data as JSON
           const parsedData = JSON.parse(sanitizedData);
 
-          // Format the playerslist if it exists
-          if (parsedData.playerslist) {
-            parsedData.playerslist = parsedData.playerslist
-              .split(';') // Split the string into an array
-              .filter((player) => player.trim() !== ''); // Remove empty entries caused by trailing semicolons
+          // Format the players list if it exists.
+          let players = [];
+          if (Array.isArray(parsedData.playerslist)) {
+            players = parsedData.playerslist.filter((player) => String(player).trim() !== '');
+          } else if (typeof parsedData.playerslist === 'string') {
+            players = parsedData.playerslist
+              .split(';')
+              .map((player) => player.trim())
+              .filter((player) => player !== '');
           }
 
-          resolve(parsedData); // Resolve with the formatted data
+          const maxplayersRaw = parsedData.maxplayers ?? parsedData.maxPlayers ?? parsedData.max_clients;
+          const maxplayers = Number.isFinite(Number(maxplayersRaw)) ? Number(maxplayersRaw) : 0;
+          const numplayersRaw = parsedData.numplayers ?? parsedData.players ?? parsedData.playersCount;
+          const numplayers = Number.isFinite(Number(numplayersRaw)) ? Number(numplayersRaw) : players.length;
+          const ping = await pingPromise;
+
+          resolve({
+            players,
+            maxplayers,
+            numplayers,
+            ping,
+          });
         } catch (error) {
           console.error('Error parsing BeamMP server response:', error.message);
           reject(new Error('Failed to parse server response.'));
