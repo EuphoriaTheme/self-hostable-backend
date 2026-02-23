@@ -20,9 +20,11 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 import gameApiRoutes from './routes/gameapi.js';
 import translationApiRoutes from './routes/translations.js';
+import rconRoutes from './routes/rcon.js';
 
 app.use('/gameapi', gameApiRoutes);
 app.use('/translations', translationApiRoutes);
+app.use('/rcon', rconRoutes);
 
 app.get('/', (req, res) => res.send('API Running'));
 
