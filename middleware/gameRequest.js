@@ -1,9 +1,10 @@
-async function validateGameRequest(req, res, next) {
-    const { game, ip, port } = req.params;
-  
-    if (!game || !ip || !port) {
-      return res.status(400).json({ success: false, error: 'Invalid parameters' });
-    }
-  
-    next(); // Proceed to the next middleware or route handler
+export default function validateGameRequest(request, reply, done) {
+  const { game, ip, port } = request.params || {};
+
+  if (!game || !ip || !port) {
+    reply.code(400).send({ success: false, error: 'Invalid parameters' });
+    return;
   }
+
+  done(); // Proceed to the next preHandler or route handler
+}

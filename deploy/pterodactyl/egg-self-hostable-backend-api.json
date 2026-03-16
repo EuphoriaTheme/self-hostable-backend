@@ -1,0 +1,102 @@
+{
+  "_comment": "DO NOT EDIT: FILE GENERATED FOR PTERODACTYL PANEL IMPORT",
+  "meta": {
+    "version": "PTDL_v2",
+    "update_url": null
+  },
+  "exported_at": "2026-03-16T00:00:00+00:00",
+  "name": "Self-Hostable Backend API",
+  "author": "repgraphics@euphoriadevelopment.uk",
+  "description": "Runs the Euphoria self-hostable backend API (Fastify). Supports optional blueprint-translations auto-fetch on startup.",
+  "features": null,
+  "docker_images": {
+    "ghcr.io/pterodactyl/yolks:nodejs_20": "ghcr.io/pterodactyl/yolks:nodejs_20"
+  },
+  "file_denylist": [],
+  "startup": "if [ -f /home/container/package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi; npm start",
+  "config": {
+    "files": "{}",
+    "startup": "{\"done\":[\"Server listening at\",\"API Running\"]}",
+    "logs": "{}",
+    "stop": "^C"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!/bin/ash\nset -eu\n\ncd /mnt/server\n\nif [ -f package-lock.json ]; then\n  npm ci --omit=dev\nelse\n  npm install --omit=dev\nfi\n",
+      "container": "ghcr.io/pterodactyl/installers:alpine",
+      "entrypoint": "ash"
+    }
+  },
+  "variables": [
+    {
+      "name": "Server Port",
+      "description": "Port used by the API inside the container.",
+      "env_variable": "PORT",
+      "default_value": "3000",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|between:1,65535",
+      "field_type": "text"
+    },
+    {
+      "name": "Auto Fetch Translations",
+      "description": "Fetch blueprint translation JSON files during startup.",
+      "env_variable": "TRANSLATIONS_AUTO_FETCH",
+      "default_value": "true",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|in:true,false,1,0,yes,no,on,off",
+      "field_type": "text"
+    },
+    {
+      "name": "Translations Source Base URL",
+      "description": "Base URL for blueprint-translations raw files.",
+      "env_variable": "TRANSLATIONS_SOURCE_BASE_URL",
+      "default_value": "https://raw.githubusercontent.com/EuphoriaTheme/blueprint-translations/main",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:255",
+      "field_type": "text"
+    },
+    {
+      "name": "Translations Remote Paths",
+      "description": "Comma-separated remote directories checked for translation files.",
+      "env_variable": "TRANSLATIONS_REMOTE_PATHS",
+      "default_value": "translations,public/translations",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:255",
+      "field_type": "text"
+    },
+    {
+      "name": "Translations Timeout (ms)",
+      "description": "HTTP timeout per file when syncing translations.",
+      "env_variable": "TRANSLATIONS_TIMEOUT_MS",
+      "default_value": "10000",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|between:1000,60000",
+      "field_type": "text"
+    },
+    {
+      "name": "GitHub Tree Lookup",
+      "description": "Use GitHub API tree fallback to auto-discover JSON paths in the source repository.",
+      "env_variable": "TRANSLATIONS_GITHUB_TREE_LOOKUP",
+      "default_value": "true",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|in:true,false,1,0,yes,no,on,off",
+      "field_type": "text"
+    },
+    {
+      "name": "Translations File List",
+      "description": "Optional comma-separated file list to sync (blank means use local JSON files).",
+      "env_variable": "TRANSLATIONS_FILE_LIST",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:500",
+      "field_type": "text"
+    }
+  ]
+}

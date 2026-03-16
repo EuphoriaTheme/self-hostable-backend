@@ -1,32 +1,42 @@
-import express from 'express';
-import cors from 'cors';
-import session from 'express-session';
+import Fastify from 'fastify';
+import fastifyCors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
+import fastifyFormbody from '@fastify/formbody';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { syncBlueprintTranslations } from './scripts/syncTranslations.js';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // This parses URL-encoded bodies
+const app = Fastify({ logger: true });
 
-// Serve static files from /public
-app.use('/public', express.static(path.join(__dirname, 'public')));
+await syncBlueprintTranslations({ logger: app.log });
+
+await app.register(fastifyCors);
+await app.register(fastifyFormbody);
+await app.register(fastifyStatic, {
+	root: path.join(__dirname, 'public'),
+	prefix: '/public/',
+});
 
 import gameApiRoutes from './routes/gameapi.js';
 import translationApiRoutes from './routes/translations.js';
 import rconRoutes from './routes/rcon.js';
 
-app.use('/gameapi', gameApiRoutes);
-app.use('/translations', translationApiRoutes);
-app.use('/rcon', rconRoutes);
+await app.register(gameApiRoutes, { prefix: '/gameapi' });
+await app.register(translationApiRoutes, { prefix: '/translations' });
+await app.register(rconRoutes, { prefix: '/rcon' });
 
-app.get('/', (req, res) => res.send('API Running'));
+app.get('/', async () => 'API Running');
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+try {
+	await app.listen({ port: Number(PORT), host: '0.0.0.0' });
+} catch (error) {
+	app.log.error(error);
+	process.exit(1);
+}

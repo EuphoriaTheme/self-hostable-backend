@@ -2,13 +2,10 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import express from 'express';
 import queryFiveMServer from '../handlers/queryFiveMServer.js';
 import queryBeamMPServer from '../handlers/queryBeamMPServer.js';
 import queryMinecraftServer from '../handlers/queryMinecraftServer.js';
 import handleDefaultGame from '../handlers/defaultGameHandler.js';
-
-const router = express.Router();
 
 // Helper to get games list from YAML
 function getGamesList() {
@@ -24,37 +21,38 @@ function getGamesList() {
   }
 }
 
-// List all games from games.yml
-router.get('/', (req, res) => {
-  const games = getGamesList();
-  res.json(games);
-});
+export default async function gameApiRoutes(fastify) {
+  // List all games from games.yml
+  fastify.get('/', async () => {
+    const games = getGamesList();
+    return games;
+  });
 
-// General Game server query (auth required)
-router.get('/:game/ip=:ip&port=:port', async (req, res) => {
-  const { game, ip, port } = req.params;
-  const normalizedGame = game.toLowerCase();
-  try {
-    if (["fivem", "gta5f"].includes(normalizedGame)) {
-      const result = await queryFiveMServer(ip, port);
-      return res.json(result);
-    }
-    if (normalizedGame === "beammp") {
-      const result = await queryBeamMPServer(ip, port);
-      return res.json({ success: true, data: result });
-    }
-    if (normalizedGame === "minecraft") {
-      const result = await queryMinecraftServer(ip, port);
-      return res.json(result);
-    }
+  // General Game server query (auth required)
+  fastify.get('/:game/ip=:ip&port=:port', async (request, reply) => {
+    const { game, ip, port } = request.params;
+    const normalizedGame = game.toLowerCase();
+    try {
+      if (["fivem", "gta5f"].includes(normalizedGame)) {
+        const result = await queryFiveMServer(ip, port);
+        return result;
+      }
+      if (normalizedGame === "beammp") {
+        const result = await queryBeamMPServer(ip, port);
+        return { success: true, data: result };
+      }
+      if (normalizedGame === "minecraft") {
+        const result = await queryMinecraftServer(ip, port);
+        return result;
+      }
 
-    // Default handler for all other games
-    const result = await handleDefaultGame(normalizedGame, ip, port);
-    return res.json(result);
-  } catch (error) {
-    console.error(`Error processing request: ${error.message}`);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-export default router;
+      // Default handler for all other games
+      const result = await handleDefaultGame(normalizedGame, ip, port);
+      return result;
+    } catch (error) {
+      console.error(`Error processing request: ${error.message}`);
+      reply.code(500);
+      return { success: false, error: error.message };
+    }
+  });
+}
