@@ -1,5 +1,5 @@
-import axios from 'axios';
-import pingServer from './pingServer.js';
+import axios from "axios";
+import pingServer from "./pingServer.js";
 
 export default async function queryFiveMServer(ip, port) {
   try {
@@ -8,10 +8,14 @@ export default async function queryFiveMServer(ip, port) {
     const ping = await pingServer(ip, parseInt(port, 10));
     const players = (playerData.data || []).map((player) => {
       const identifiers = player.identifiers || [];
-      const fivemId = identifiers.find((id) => id.startsWith('fivem')) || 'unknown';
-      const discord = identifiers.find((id) => id.startsWith('discord')) || undefined;
-      const steam = identifiers.find((id) => id.startsWith('steam')) || undefined;
-      const identifier = identifiers.find((id) => id.startsWith('license')) || undefined;
+      const fivemId =
+        identifiers.find((id) => id.startsWith("fivem")) || "unknown";
+      const discord =
+        identifiers.find((id) => id.startsWith("discord")) || undefined;
+      const steam =
+        identifiers.find((id) => id.startsWith("steam")) || undefined;
+      const identifier =
+        identifiers.find((id) => id.startsWith("license")) || undefined;
 
       return {
         name: player.name,
@@ -28,7 +32,7 @@ export default async function queryFiveMServer(ip, port) {
       success: true,
       data: {
         players,
-        maxplayers: parseInt(serverData?.data?.vars?.sv_maxClients || '0', 10),
+        maxplayers: parseInt(serverData?.data?.vars?.sv_maxClients || "0", 10),
         numplayers: Array.isArray(playerData.data) ? playerData.data.length : 0,
         ping,
       },

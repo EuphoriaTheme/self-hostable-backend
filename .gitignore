@@ -25,4 +25,3 @@ replay_pid*
 
 node_modules/
 .env
-package-lock.json

@@ -1,29 +1,34 @@
 # ED-API
+
 Backend API
 
 ## Features
+
 - Game API
 - Translation API & Language Files
 - Fastify-based HTTP server
 - Optional auto-fetch from blueprint-translations on startup
 
 ## Scripts Included
+
 - Update GameDig List: "node ./scripts/updateGamesYml.js",
 - Sync blueprint translations now: "npm run sync:translations"
 
 ## Setup
+
 1. Install dependencies:
    ```sh
    npm install
    ```
 2. Configure your `.env` file.
-    - You can copy from `.env.example` and adjust values.
+   - You can copy from `.env.example` and adjust values.
 3. Start the server:
    ```sh
     npm start
    ```
 
 ## Environment Variables
+
 - `PORT` (default: `3000`)
 - `TRANSLATIONS_AUTO_FETCH` (default: `true`)
 - `TRANSLATIONS_SOURCE_BASE_URL` (default: `https://raw.githubusercontent.com/EuphoriaTheme/blueprint-translations/main`)
@@ -32,18 +37,21 @@ Backend API
 - `TRANSLATIONS_GITHUB_TREE_LOOKUP` (default: `true`)
 - `TRANSLATIONS_FILE_LIST` (optional, comma-separated `.json` files)
 
-## Endpoints 
+## Endpoints
+
 - `/public` - Public directory
 - `/gameapi` - Game API info
 - `/translations` - Translation endpoints
 - `/rcon` - RCON endpoints
 
 ## Pterodactyl Egg (Not Yet Tested)
+
 - Import: `deploy/pterodactyl/egg-self-hostable-backend-api.json`
 - The egg installs production dependencies and starts with `npm start`.
 - Environment variables for translation auto-fetch are included in egg variables.
 
 ## Example NGINX Reverse Proxy
+
 ```
 map $http_upgrade $connection_upgrade {
     default upgrade;
